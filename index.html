@@ -18,6 +18,7 @@
     .name{font-weight:600}
     .desc{color:#9fb1c7;font-size:.9rem}
     .price{font-weight:bold}
+    .service{margin:-6px 0 16px;background:#10161f;border:1px solid #333;color:#bfe1ff;padding:10px 12px;border-radius:10px;display:inline-block}
     footer{margin-top:24px;color:#9fb1c7;text-align:center}
   </style>
 </head>
@@ -27,6 +28,8 @@
       <div class="logo">Restaurante Charly</div>
       <input id="search" type="search" class="search" placeholder="Buscar platillo…" />
     </header>
+
+    <div class="service" id="serviceTitle">Servicio actual</div>
 
     <main id="grid"></main>
 
@@ -44,23 +47,58 @@
 
     const el = (s) => document.querySelector(s);
 
+    // Hora local CDMX
+    function nowInMX(){
+      try{ return new Date(new Date().toLocaleString('en-US', { timeZone:'America/Mexico_City' })); }
+      catch{ return new Date(); }
+    }
+    function currentService(){
+      const h = nowInMX().getHours();
+      return (h < 12) ? 'Desayunos' : 'Comidas';
+    }
+    let SERVICE = '';
+
     function parseCSV(text){
-      const rows = text.trim().split(/\r?\n/).map(r=>r.split(","));
+      // Parser CSV robusto: respeta comillas y comillas escapadas
+      const rows=[]; let row=[], cur='', inside=false; const push=()=>{row.push(cur);cur=''};
+      text = text.replace(/^﻿/, ''); // quitar BOM si existe
+      for(let i=0;i<text.length;i++){
+        const ch=text[i];
+        if(ch==='"'){
+          if(inside && text[i+1]==='"'){cur+='"'; i++;}
+          else{inside=!inside;}
+        } else if(ch===',' && !inside){ push(); }
+        else if((ch==='
+' || ch==='
+') && !inside){ if(cur!=='' || row.length){ push(); rows.push(row); row=[] } }
+        else { cur+=ch }
+      }
+      if(cur!=='' || row.length){ push(); rows.push(row) }
       return rows;
     }
 
     function toRecords(rows){
-      const header = rows[0].map(h=>h.toLowerCase());
+      if(!rows || !rows.length) return [];
+      const header = rows[0].map(h=>String(h||'').trim().toLowerCase());
+      const need = ['category','item','description','price'];
+      for(const k of need){
+        if(!header.includes(k)){
+          throw new Error(`Falta la columna: ${k}. Encabezados encontrados: ${header.join(', ')}`);
+        }
+      }
       const idx = (k)=> header.indexOf(k);
       const out=[];
       for(let i=1;i<rows.length;i++){
-        const r=rows[i];
+        const r=rows[i]; if(!r || !r.length) continue;
         out.push({
-          category:r[idx('category')],
-          item:r[idx('item')],
-          description:r[idx('description')],
-          price:r[idx('price')]
+          category:String(r[idx('category')]||'').trim()||'Sin categoría',
+          item:String(r[idx('item')]||'').trim(),
+          description:String(r[idx('description')]||'').trim(),
+          price:String(r[idx('price')]||'').trim()
         });
+      }
+      return out.filter(x=>x.item);
+    });
       }
       return out;
     }
@@ -80,17 +118,28 @@
     function render(records){
       const grid=el('#grid');
       const q=el('#search').value.trim().toLowerCase();
-      const filtered=records.filter(r=>!q|| (r.item+" "+r.description).toLowerCase().includes(q));
+      const filtered=records.filter(r=>!q|| ((r.item||'')+" "+(r.description||'')).toLowerCase().includes(q));
       const byCat=groupBy(filtered,'category');
+
+      // Orden preferido según servicio
+      const breakfastOrder = ["Bebidas calientes","Desayunos","Entradas","Comida","Bebidas"]; 
+      const lunchOrder = ["Entradas","Comida","Bebidas","Bebidas calientes","Desayunos"]; 
+      const ORDER = (SERVICE==='Desayunos') ? breakfastOrder : lunchOrder;
+
+      const cats = Object.keys(byCat).sort((a,b)=>{
+        const ia = ORDER.indexOf(a)===-1 ? 999 : ORDER.indexOf(a);
+        const ib = ORDER.indexOf(b)===-1 ? 999 : ORDER.indexOf(b);
+        return ia - ib || a.localeCompare(b,'es');
+      });
       grid.innerHTML='';
-      Object.keys(byCat).forEach(cat=>{
+      cats.forEach(cat=>{
         const card=document.createElement('section');
         card.className='card';
         card.innerHTML=`<h2>${cat}</h2>`;
         byCat[cat].forEach(r=>{
           const item=document.createElement('div');
           item.className='item';
-          item.innerHTML=`<div><div class='name'>${r.item}</div><div class='desc'>${r.description}</div></div><div class='price'>${money(r.price)}</div>`;
+          item.innerHTML=`<div><div class='name'>${r.item}</div><div class='desc'>${r.description||''}</div></div><div class='price'>${money(r.price)}</div>`;
           card.appendChild(item);
         });
         grid.appendChild(card);
@@ -99,15 +148,17 @@
 
     async function init(){
       el('#year').textContent=new Date().getFullYear();
+      SERVICE = currentService();
+      const st = el('#serviceTitle'); if(st) st.textContent = 'Servicio actual: '+ SERVICE;
       try{
-        const res=await fetch(CONFIG.SHEET_CSV_URL);
+        const res=await fetch(CONFIG.SHEET_CSV_URL, { cache: 'no-store' });
         const text=await res.text();
         const rows=parseCSV(text);
         const records=toRecords(rows);
         render(records);
         el('#search').oninput=()=>render(records);
       }catch(err){
-        el('#grid').innerHTML='<p style="color:red">Error al cargar el menú.</p>';
+        el('#grid').innerHTML='<p style="color:red">Error al cargar el menú.<br><small>Revisa que el CSV esté publicado y que los encabezados sean: <code>category, item, description, price</code>.</small></p>';
       }
     }
     document.addEventListener('DOMContentLoaded',init);
