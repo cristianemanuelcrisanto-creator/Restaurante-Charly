@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Menú del día – Restaurante Charly</title>
+  <style>
+    body {margin:0;font-family:system-ui, sans-serif;background:#0b0f14;color:#e6edf3;}
+    .wrap{max-width:900px;margin:0 auto;padding:24px}
+    header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+    .logo{font-size:1.5rem;font-weight:bold;color:#4fb477}
+    .search{padding:8px 12px;border-radius:8px;border:1px solid #333;background:#10161f;color:#fff}
+    main{display:grid;gap:16px}
+    .card{background:#10161f;padding:18px;border-radius:16px}
+    .card h2{margin:0 0 10px;font-size:1.2rem;color:#4fb477}
+    .item{display:flex;justify-content:space-between;border-top:1px dashed #333;padding:8px 0}
+    .item:first-child{border-top:none}
+    .name{font-weight:600}
+    .desc{color:#9fb1c7;font-size:.9rem}
+    .price{font-weight:bold}
+    footer{margin-top:24px;color:#9fb1c7;text-align:center}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo">Restaurante Charly</div>
+      <input id="search" type="search" class="search" placeholder="Buscar platillo…" />
+    </header>
+
+    <main id="grid"></main>
+
+    <footer>
+      © <span id="year"></span> Restaurante Charly — Menú digital
+    </footer>
+  </div>
+
+  <script>
+    // CONFIGURACIÓN
+    const CONFIG = {
+      SHEET_CSV_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTcx99wCph10SjSUFDkuOl4qecxnOani78bdsJLctWOpvwF8DFkZXon0mabI_Gj_ch4Bw5lLwRP93CH/pub?output=csv",
+      CURRENCY: "MXN"
+    };
+
+    const el = (s) => document.querySelector(s);
+
+    function parseCSV(text){
+      const rows = text.trim().split(/\r?\n/).map(r=>r.split(","));
+      return rows;
+    }
+
+    function toRecords(rows){
+      const header = rows[0].map(h=>h.toLowerCase());
+      const idx = (k)=> header.indexOf(k);
+      const out=[];
+      for(let i=1;i<rows.length;i++){
+        const r=rows[i];
+        out.push({
+          category:r[idx('category')],
+          item:r[idx('item')],
+          description:r[idx('description')],
+          price:r[idx('price')]
+        });
+      }
+      return out;
+    }
+
+    function money(v){
+      const num=Number(v);
+      if(!isNaN(num)){
+        return new Intl.NumberFormat('es-MX',{style:'currency',currency:CONFIG.CURRENCY}).format(num);
+      }
+      return v;
+    }
+
+    function groupBy(arr,key){
+      return arr.reduce((acc,x)=>{(acc[x[key]] ||= []).push(x);return acc;},{});
+    }
+
+    function render(records){
+      const grid=el('#grid');
+      const q=el('#search').value.trim().toLowerCase();
+      const filtered=records.filter(r=>!q|| (r.item+" "+r.description).toLowerCase().includes(q));
+      const byCat=groupBy(filtered,'category');
+      grid.innerHTML='';
+      Object.keys(byCat).forEach(cat=>{
+        const card=document.createElement('section');
+        card.className='card';
+        card.innerHTML=`<h2>${cat}</h2>`;
+        byCat[cat].forEach(r=>{
+          const item=document.createElement('div');
+          item.className='item';
+          item.innerHTML=`<div><div class='name'>${r.item}</div><div class='desc'>${r.description}</div></div><div class='price'>${money(r.price)}</div>`;
+          card.appendChild(item);
+        });
+        grid.appendChild(card);
+      });
+    }
+
+    async function init(){
+      el('#year').textContent=new Date().getFullYear();
+      try{
+        const res=await fetch(CONFIG.SHEET_CSV_URL);
+        const text=await res.text();
+        const rows=parseCSV(text);
+        const records=toRecords(rows);
+        render(records);
+        el('#search').oninput=()=>render(records);
+      }catch(err){
+        el('#grid').innerHTML='<p style="color:red">Error al cargar el menú.</p>';
+      }
+    }
+    document.addEventListener('DOMContentLoaded',init);
+  </script>
+</body>
+</html>
