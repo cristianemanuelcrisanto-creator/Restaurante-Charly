@@ -112,20 +112,29 @@
 
     // CSV robusto (respeta comillas y BOM)
     function parseCSV(text){
-      const rows=[]; let row=[], cur='', inside=false; const push=()=>{row.push(cur);cur=''};
+      const rows=[]; let row=[], cur='', inside=false;
+      const push=()=>{ row.push(cur); cur=''; };
+      // Quitar BOM si existe
       text = String(text||'').replace(/^﻿/, '');
       for(let i=0;i<text.length;i++){
-        const ch=text[i];
-        if(ch==='"'){
-          if(inside && text[i+1]==='"'){cur+='"'; i++;}
-          else{inside=!inside;}
-        } else if(ch===',' && !inside){ push(); }
-        else if((ch==='
-' || ch==='
-') && !inside){ if(cur!=='' || row.length){ push(); rows.push(row); row=[]; } }
-        else { cur+=ch; }
+        const ch = text[i];
+        if(ch === '"'){
+          if(inside && text[i+1] === '"'){ cur += '"'; i++; }
+          else { inside = !inside; }
+        } else if(ch === ',' && !inside){
+          push();
+        } else if((ch === '
+' || ch === '
+') && !inside){
+          if(cur !== '' || row.length){ push(); rows.push(row); row = []; }
+          if(ch === '
+' && text[i+1] === '
+'){ i++; }
+        } else {
+          cur += ch;
+        }
       }
-      if(cur!=='' || row.length){ push(); rows.push(row); }
+      if(cur !== '' || row.length){ push(); rows.push(row); }
       return rows;
     }
 
@@ -135,9 +144,8 @@
       const norm = (s)=> String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
       const header = rows[0].map(h=>norm(h));
 
-      // Encuentra índice por sinónimos
+      // Buscar índices por sinónimos (es/en)
       const findIdx = (alts)=>{ for(const a of alts){ const i = header.indexOf(a); if(i!==-1) return i; } return -1; };
-
       const catIdx   = findIdx(['category','categoria','categoria/section','seccion','sección','tipo']);
       const itemIdx  = findIdx(['item','platillo','producto','nombre']);
       const descIdx  = findIdx(['description','descripcion','descripción','detalle','desc']);
