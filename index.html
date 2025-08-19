@@ -92,12 +92,10 @@
   </footer>
 
   <script>
-    // ========= CONFIG =========
     const CONFIG = {
-      SHEET_CSV_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTcx99wCph10SjSUFDkuOl4qecxnOani78bdsJLctWOpvwF8DFkZXon0mabI_Gj_ch4Bw5lLwRP93CH/pub?output=csv",
+      SHEET_CSV_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTcx99wCph10SjSUFDkuOl4qecxnOani78bdsJLctWOpvwF8DFkZXon0mabI_Gj_ch4Bw5lLwRP93CH/pub?gid=153344127&single=true&output=csv",
       CURRENCY: "MXN"
     };
-    // ==========================
 
     const el = (s) => document.querySelector(s);
 
@@ -111,19 +109,20 @@
       return (h < 12) ? 'Desayunos' : 'Comidas';
     }
     let SERVICE = '';
-    let MANUAL = false;
 
     // CSV robusto (respeta comillas y BOM)
     function parseCSV(text){
       const rows=[]; let row=[], cur='', inside=false; const push=()=>{row.push(cur);cur=''};
-      text = String(text||'').replace(/^\uFEFF/, ''); // quitar BOM si existe
+      text = String(text||'').replace(/^﻿/, '');
       for(let i=0;i<text.length;i++){
         const ch=text[i];
         if(ch==='"'){
           if(inside && text[i+1]==='"'){cur+='"'; i++;}
           else{inside=!inside;}
         } else if(ch===',' && !inside){ push(); }
-        else if((ch==='\n' || ch==='\r') && !inside){ if(cur!=='' || row.length){ push(); rows.push(row); row=[]; } }
+        else if((ch==='
+' || ch==='
+') && !inside){ if(cur!=='' || row.length){ push(); rows.push(row); row=[]; } }
         else { cur+=ch; }
       }
       if(cur!=='' || row.length){ push(); rows.push(row); }
@@ -137,10 +136,7 @@
       const header = rows[0].map(h=>norm(h));
 
       // Encuentra índice por sinónimos
-      const findIdx = (alts)=>{
-        for(const a of alts){ const i = header.indexOf(a); if(i!==-1) return i; }
-        return -1;
-      };
+      const findIdx = (alts)=>{ for(const a of alts){ const i = header.indexOf(a); if(i!==-1) return i; } return -1; };
 
       const catIdx   = findIdx(['category','categoria','categoria/section','seccion','sección','tipo']);
       const itemIdx  = findIdx(['item','platillo','producto','nombre']);
@@ -153,9 +149,7 @@
       if(itemIdx===-1) missing.push('item/platillo');
       if(descIdx===-1) missing.push('description/descripción');
       if(priceIdx===-1)missing.push('price/precio');
-      if(missing.length){
-        throw new Error('Faltan columnas: ' + missing.join(', ') + '. Encabezados detectados: ' + header.join(', '));
-      }
+      if(missing.length){ throw new Error('Faltan columnas: ' + missing.join(', ') + '. Encabezados: ' + header.join(', ')); }
 
       const out=[];
       for(let i=1;i<rows.length;i++){
@@ -175,27 +169,6 @@
       }
       return out;
     }
-      }
-      const idx = (k)=> header.indexOf(k);
-      const availIdx = idx('available');
-      const out=[];
-      for(let i=1;i<rows.length;i++){
-        const r=rows[i]; if(!r || !r.length) continue;
-        const rec = {
-          category:String(r[idx('category')]||'').trim()||'Sin categoría',
-          item:String(r[idx('item')]||'').trim(),
-          description:String(r[idx('description')]||'').trim(),
-          price:String(r[idx('price')]||'').trim(),
-          available:true
-        };
-        if(availIdx !== -1){
-          const v = String(r[availIdx]||'').trim().toLowerCase();
-          if(v==='false' || v==='0' || v==='no'){ rec.available = false; }
-        }
-        if(rec.item) out.push(rec);
-      }
-      return out;
-    }
 
     function money(v){
       const num=Number(String(v).replace(/[^0-9.\-]/g,''));
@@ -205,9 +178,7 @@
       return v || '';
     }
 
-    function groupBy(arr,key){
-      return arr.reduce((acc,x)=>{(acc[x[key]] ||= []).push(x);return acc;},{});
-    }
+    function groupBy(arr,key){ return arr.reduce((acc,x)=>{(acc[x[key]] ||= []).push(x);return acc;},{}); }
 
     const ICON = (name)=>{
       const n = String(name||'').toLowerCase();
@@ -227,7 +198,6 @@
         .filter(r => !q || ((r.item||'') + ' ' + (r.description||'')).toLowerCase().includes(q));
       const byCat=groupBy(filtered,'category');
 
-      // Orden preferido según servicio (case-insensitive)
       const breakfastOrder = ['bebidas calientes','comida','desayunos','entradas','bebidas']; // mañana
       const lunchOrder     = ['entradas','comida','bebidas','bebidas calientes','desayunos'];  // tarde
       const ORDER = (SERVICE==='Desayunos') ? breakfastOrder : lunchOrder;
@@ -265,12 +235,11 @@
     }
 
     async function init(){
-      el('#year').textContent=new Date().getFullYear();
+      document.getElementById('year').textContent=new Date().getFullYear();
       SERVICE = autoService();
-      const st = el('#serviceTitle'); if(st) st.textContent = 'Servicio actual: ' + SERVICE;
-      const btn = el('#toggleService');
+      const st = document.getElementById('serviceTitle'); if(st) st.textContent = 'Servicio actual: ' + SERVICE;
+      const btn = document.getElementById('toggleService');
       if(btn){ btn.addEventListener('click', ()=>{
-        MANUAL = true;
         SERVICE = (SERVICE==='Desayunos') ? 'Comidas' : 'Desayunos';
         st.textContent = 'Servicio actual: ' + SERVICE + ' (manual)';
         render(window.__records||[]);
@@ -281,13 +250,13 @@
         const text = await res.text();
         const rows = parseCSV(text);
         const records = toRecords(rows);
-        window.__records = records; // cache en memoria para re-render
+        window.__records = records;
         render(records);
-        el('#search').oninput=()=>render(window.__records||[]);
+        document.getElementById('search').oninput=()=>render(window.__records||[]);
       }catch(err){
         console.error(err);
-        const grid=el('#grid');
-        grid.innerHTML = `<div class='error'>Error al cargar el menú.<br><small>Revisa que el CSV esté publicado y que los encabezados sean: <code>category, item, description, price</code>.</small></div>`;
+        const grid=document.getElementById('grid');
+        grid.innerHTML = `<div class='error'>Error al cargar el menú.<br><small>Revisa que el CSV esté publicado y que los encabezados sean: <code>category/categoría, item/platillo, description/descripción, price/precio</code>.</small></div>`;
       }
     }
     document.addEventListener('DOMContentLoaded', init);
