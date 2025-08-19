@@ -4,98 +4,62 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Menú del día – Restaurante Charly</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     :root{
-      --bg:#FFF3EE;            /* fondo suave tipo Wax Flower */
-      --ink:#471B08;           /* texto café oscuro (950) */
-      --muted:#82391A;         /* texto secundario (900/800) */
-      --card:#FFFFFF;          /* tarjetas claras */
-      --line:#FFD0BF;          /* bordes melocotón */
-      --primary:#F5743E;       /* naranja 500 */
-      --primary-600:#E25A20;   /* 600 */
-      --primary-700:#BE4917;   /* 700 */
-      --primary-100:#FFEAE1;   /* 100 */
-      --primary-rgb:245,116,62;/* para gradientes */
+      --p50:#FEF6F2;  /* Wax Flower 50 */
+      --p100:#FFEAE1; /* 100 */
+      --p200:#F8D8C8; /* 200 */
+      --p300:#FFC4AB; /* 300 */
+      --p400:#FD976C; /* 400 */
+      --p500:#F5743E; /* 500 */
+      --p600:#E25A20; /* 600 */
+      --p700:#BE4917; /* 700 */
+      --p800:#9D3F17; /* 800 */
+      --p900:#82391A; /* 900 */
+      --p950:#471B08; /* 950 */
     }
+
     *{box-sizing:border-box}
-    html,body{height:100%}
-    body{margin:0;font-family:Poppins,system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial,'Noto Sans',sans-serif;background:var(--bg);color:var(--ink);}
-
-    /* Cabecera con grecas */
-    .greca{height:0;display:none}
-
-    header{position:sticky;top:0;background:linear-gradient(#fffdf8,rgba(255,253,248,.9));backdrop-filter:saturate(1.2) blur(6px);border-bottom:1px solid var(--line);z-index:20}
-    .wrap{max-width:980px;margin:0 auto;padding:16px 20px}
-    .brand{display:flex;gap:14px;align-items:center;}
-    .logo{width:56px;height:56px;border-radius:16px;background:conic-gradient(from 30deg,var(--primary),var(--primary-600));box-shadow:0 6px 22px rgba(245,116,62,.25)}
-    .titles h1{font-family:'Poppins',sans-serif;font-weight:700;font-size:1.9rem;letter-spacing:.3px;margin:0;color:#2a1e1e}
-    .titles .sub{color:var(--muted);margin-top:2px}
-
-    .topbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-top:12px}
-    .search{flex:1 1 280px;display:flex;gap:8px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px}
-    .search input{border:0;outline:0;width:100%;font-size:1rem}
-    .service-pill{display:flex;gap:8px;align-items:center;background:var(--primary-100);color:var(--primary-700);border:1px solid var(--line);padding:9px 12px;border-radius:999px;font-weight:700}
-    .toggle{border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 14px;cursor:pointer;color:var(--primary-700);font-weight:600}
-
-    main{max-width:980px;margin:10px auto 28px;padding:0 20px;display:grid;grid-template-columns:1fr;gap:16px}
-    @media(min-width:880px){main{grid-template-columns:1fr 1fr}}
-
-    .card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px 18px 12px;box-shadow:0 12px 28px rgba(71,27,8,.08);background-image:radial-gradient(1200px 240px at -10% -10%, rgba(var(--primary-rgb),.08), transparent 60%), radial-gradient(700px 220px at 110% 0%, rgba(var(--primary-rgb),.06), transparent 60%);}
-    .card h2{display:flex;align-items:center;gap:10px;margin:0 0 10px;font-weight:700;font-size:1.1rem;color:var(--ink)}
-    .chip{font-size:.72rem;color:var(--primary-700);background:var(--primary-100);border:1px solid var(--line);border-radius:999px;padding:3px 9px}
-
-    .item{display:grid;grid-template-columns:1fr auto;gap:10px;padding:10px 0;border-top:1px dashed var(--line)}
-    .item:first-child{border-top:0}
-    .name{font-weight:700}
-    .desc{color:var(--muted);font-size:.95rem;margin-top:2px}
-    .price{font-weight:800}
-
-    footer{border-top:1px solid var(--line);background:#fffaf4}
-    footer .wrap{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:.95rem}
-
-    /* Pequeños adornos */
-    .divider{height:8px;background:repeating-linear-gradient(90deg,var(--primary) 0 16px,transparent 16px 20px),repeating-linear-gradient(90deg,var(--primary-600) 0 16px,transparent 16px 20px);background-size:200px 4px,200px 4px;background-position:0 0,0 4px;background-repeat:repeat no-repeat;border-radius:6px;margin:10px 0}
-    .empty{opacity:.7;border:1px dashed var(--line);border-radius:14px;padding:16px;text-align:center;background:#fff}
-    .error{background:#fff3f3;border:1px solid #ffd1d1;color:#9a1e1e;padding:12px;border-radius:12px}
+    body {margin:0;font-family:system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;background:var(--p50);color:var(--p950)}
+    .wrap{max-width:900px;margin:0 auto;padding:24px}
+    header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+    .logo{font-size:1.5rem;font-weight:bold;color:var(--p700)}
+    .search{padding:8px 12px;border-radius:8px;border:1px solid var(--p200);background:#fff;color:var(--p950);min-width:220px}
+    main{display:grid;gap:16px}
+    .card{background:#fff;padding:18px;border-radius:16px;border:1px solid var(--p200)}
+    .card h2{margin:0 0 10px;font-size:1.2rem;color:var(--p700)}
+    .item{display:flex;justify-content:space-between;border-top:1px dashed var(--p200);padding:8px 0;gap:12px}
+    .item:first-child{border-top:none}
+    .name{font-weight:600}
+    .desc{color:var(--p800);font-size:.9rem}
+    .price{font-weight:bold;white-space:nowrap;color:var(--p700)}
+    .service{margin:-6px 0 16px;background:var(--p100);border:1px solid var(--p200);color:var(--p700);padding:10px 12px;border-radius:10px;display:inline-block}
+    footer{margin-top:24px;color:var(--p900);text-align:center}
   </style>
 </head>
 <body>
-  <div class="greca"></div>
-  <header>
-    <div class="wrap">
-      <div class="brand">
-        <div class="logo" aria-hidden="true"></div>
-        <div class="titles">
-          <h1>Restaurante Charly</h1>
-          <div class="sub">Cocina oaxaqueña · Menú del día</div>
-        </div>
-      </div>
-      <div class="topbar">
-        <div class="search">
-          <span>🔎</span>
-          <input id="search" type="search" placeholder="Buscar platillo (ej. tasajo, café, agua del día)…" />
-        </div>
-        <div class="service-pill" id="serviceTitle">Servicio actual</div>
-        <button class="toggle" id="toggleService" title="Cambiar servicio manualmente">Cambiar servicio</button>
-      </div>
-    </div>
-  </header>
+  <div class="wrap">
+    <header>
+      <div class="logo">Restaurante Charly</div>
+      <input id="search" type="search" class="search" placeholder="Buscar platillo…" />
+    </header>
 
-  <main id="grid"></main>
+    <div class="service" id="serviceTitle">Servicio actual</div>
 
-  <footer>
-    <div class="wrap">
-      <div>© <span id="year"></span> Restaurante Charly</div>
-      <div>Actualiza el Google Sheet y refresca la página</div>
-    </div>
-  </footer>
+    <main id="grid"></main>
+
+    <footer>
+      © <span id="year"></span> Restaurante Charly — Menú digital
+    </footer>
+  </div>
 
   <script>
+    // ========= CONFIG =========
     const CONFIG = {
       SHEET_CSV_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTcx99wCph10SjSUFDkuOl4qecxnOani78bdsJLctWOpvwF8DFkZXon0mabI_Gj_ch4Bw5lLwRP93CH/pub?gid=153344127&single=true&output=csv",
       CURRENCY: "MXN"
     };
+    // ==========================
 
     const el = (s) => document.querySelector(s);
 
@@ -104,7 +68,7 @@
       try { return new Date(new Date().toLocaleString('en-US', { timeZone:'America/Mexico_City' })); }
       catch { return new Date(); }
     }
-    function autoService(){
+    function currentService(){
       const h = nowInMX().getHours();
       return (h < 12) ? 'Desayunos' : 'Comidas';
     }
@@ -112,39 +76,28 @@
 
     // CSV robusto (respeta comillas y BOM)
     function parseCSV(text){
-      const rows=[]; let row=[], cur='', inside=false;
-      const push=()=>{ row.push(cur); cur=''; };
-      // Quitar BOM si existe
-      text = String(text||'').replace(/^﻿/, '');
+      const rows=[]; let row=[], cur='', inside=false; const push=()=>{row.push(cur);cur=''};
+      text = String(text||'').replace(/^\uFEFF/, ''); // quitar BOM si existe
       for(let i=0;i<text.length;i++){
-        const ch = text[i];
-        if(ch === '"'){
-          if(inside && text[i+1] === '"'){ cur += '"'; i++; }
-          else { inside = !inside; }
-        } else if(ch === ',' && !inside){
-          push();
-        } else if((ch === '
-' || ch === '
-') && !inside){
-          if(cur !== '' || row.length){ push(); rows.push(row); row = []; }
-          if(ch === '
-' && text[i+1] === '
-'){ i++; }
-        } else {
-          cur += ch;
-        }
+        const ch=text[i];
+        if(ch==='"'){
+          if(inside && text[i+1]==='"'){cur+='"'; i++;}
+          else{inside=!inside;}
+        } else if(ch===',' && !inside){ push(); }
+        else if((ch==='\n' || ch==='\r') && !inside){ if(cur!=='' || row.length){ push(); rows.push(row); row=[]; } if(ch==='\r' && text[i+1]==='\n'){ i++; } }
+        else { cur+=ch; }
       }
-      if(cur !== '' || row.length){ push(); rows.push(row); }
+      if(cur!=='' || row.length){ push(); rows.push(row); }
       return rows;
     }
 
     function toRecords(rows){
       if(!rows || !rows.length) return [];
       // Normaliza encabezados: minúsculas y sin acentos
-      const norm = (s)=> String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
+      const norm = (s)=> String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
       const header = rows[0].map(h=>norm(h));
 
-      // Buscar índices por sinónimos (es/en)
+      // Índices por sinónimos (es/en)
       const findIdx = (alts)=>{ for(const a of alts){ const i = header.indexOf(a); if(i!==-1) return i; } return -1; };
       const catIdx   = findIdx(['category','categoria','categoria/section','seccion','sección','tipo']);
       const itemIdx  = findIdx(['item','platillo','producto','nombre']);
@@ -169,9 +122,9 @@
           price:String(r[priceIdx]||'').trim(),
           available:true
         };
-        if(availIdx!==-1){
+        if(availIdx !== -1){
           const v = norm(r[availIdx]);
-          if(v==='false' || v==='0' || v==='no'){ rec.available=false; }
+          if(v==='false' || v==='0' || v==='no'){ rec.available = false; }
         }
         if(rec.item) out.push(rec);
       }
@@ -186,16 +139,8 @@
       return v || '';
     }
 
-    function groupBy(arr,key){ return arr.reduce((acc,x)=>{(acc[x[key]] ||= []).push(x);return acc;},{}); }
-
-    const ICON = (name)=>{
-      const n = String(name||'').toLowerCase();
-      if(n.includes('bebidas calientes')) return '🫖';
-      if(n.includes('entradas')) return '🥗';
-      if(n.includes('comida')) return '🍽️';
-      if(n.includes('desayuno')) return '🍳';
-      if(n.includes('bebidas')) return '🥤';
-      return '🍽️';
+    function groupBy(arr,key){
+      return arr.reduce((acc,x)=>{(acc[x[key]] ||= []).push(x);return acc;},{});
     }
 
     function render(records){
@@ -206,6 +151,7 @@
         .filter(r => !q || ((r.item||'') + ' ' + (r.description||'')).toLowerCase().includes(q));
       const byCat=groupBy(filtered,'category');
 
+      // Orden preferido según servicio (case-insensitive)
       const breakfastOrder = ['bebidas calientes','comida','desayunos','entradas','bebidas']; // mañana
       const lunchOrder     = ['entradas','comida','bebidas','bebidas calientes','desayunos'];  // tarde
       const ORDER = (SERVICE==='Desayunos') ? breakfastOrder : lunchOrder;
@@ -221,8 +167,8 @@
       grid.innerHTML='';
       if(cats.length===0){
         const empty = document.createElement('div');
-        empty.className='empty';
-        empty.innerHTML = 'No hay platillos para mostrar con los filtros actuales.';
+        empty.className='card';
+        empty.innerHTML = '<div class="desc">No hay platillos para mostrar con los filtros actuales.</div>';
         grid.appendChild(empty);
         return;
       }
@@ -230,8 +176,7 @@
       cats.forEach(cat=>{
         const card=document.createElement('section');
         card.className='card';
-        const icon = ICON(cat);
-        card.innerHTML=`<h2>${icon} ${cat} <span class="chip">${byCat[cat].length} items</span></h2><div class="divider"></div>`;
+        card.innerHTML=`<h2>${cat}</h2>`;
         byCat[cat].forEach(r=>{
           const item=document.createElement('div');
           item.className='item';
@@ -243,28 +188,20 @@
     }
 
     async function init(){
-      document.getElementById('year').textContent=new Date().getFullYear();
-      SERVICE = autoService();
-      const st = document.getElementById('serviceTitle'); if(st) st.textContent = 'Servicio actual: ' + SERVICE;
-      const btn = document.getElementById('toggleService');
-      if(btn){ btn.addEventListener('click', ()=>{
-        SERVICE = (SERVICE==='Desayunos') ? 'Comidas' : 'Desayunos';
-        st.textContent = 'Servicio actual: ' + SERVICE + ' (manual)';
-        render(window.__records||[]);
-      });}
+      el('#year').textContent=new Date().getFullYear();
+      SERVICE = currentService();
+      const st = el('#serviceTitle'); if(st) st.textContent = 'Servicio actual: ' + SERVICE;
       try{
         const res = await fetch(CONFIG.SHEET_CSV_URL, { cache: 'no-store' });
         if(!res.ok) throw new Error(res.status + ' ' + res.statusText);
         const text = await res.text();
         const rows = parseCSV(text);
         const records = toRecords(rows);
-        window.__records = records;
         render(records);
-        document.getElementById('search').oninput=()=>render(window.__records||[]);
+        el('#search').oninput=()=>render(records);
       }catch(err){
         console.error(err);
-        const grid=document.getElementById('grid');
-        grid.innerHTML = `<div class='error'>Error al cargar el menú.<br><small>Revisa que el CSV esté publicado y que los encabezados sean: <code>category/categoría, item/platillo, description/descripción, price/precio</code>.</small></div>`;
+        el('#grid').innerHTML='<p style="color:var(--p700)">Error al cargar el menú.<br><small>Revisa que el CSV esté publicado y que los encabezados sean: <code>category/categoría, item/platillo, description/descripción, price/precio</code>.</small></p>';
       }
     }
     document.addEventListener('DOMContentLoaded', init);
