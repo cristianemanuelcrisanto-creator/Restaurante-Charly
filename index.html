@@ -28,8 +28,8 @@
     header{position:sticky;top:0;background:linear-gradient(#fffdf8,rgba(255,253,248,.9));backdrop-filter:saturate(1.2) blur(6px);border-bottom:1px solid var(--line);z-index:20}
     .wrap{max-width:980px;margin:0 auto;padding:16px 20px}
     .brand{display:flex;gap:14px;align-items:center;}
-    .logo{width:56px;height:56px;border-radius:16px;background:conic-gradient(from 30deg,var(--accent),var(--accent-2));box-shadow:0 6px 22px rgba(181,22,74,.25)}
-    .titles h1{font-family:'Yeseva One',serif;font-size:1.9rem;letter-spacing:.5px;margin:0;color:#2a1e1e}
+    .logo{width:56px;height:56px;border-radius:16px;background:conic-gradient(from 30deg,var(--primary),var(--primary-600));box-shadow:0 6px 22px rgba(245,116,62,.25)}
+    .titles h1{font-family:'Poppins',sans-serif;font-weight:700;font-size:1.9rem;letter-spacing:.3px;margin:0;color:#2a1e1e}
     .titles .sub{color:var(--muted);margin-top:2px}
 
     .topbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-top:12px}
@@ -55,7 +55,7 @@
     footer .wrap{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:.95rem}
 
     /* Pequeños adornos */
-    .divider{height:8px;background:repeating-linear-gradient(90deg,var(--accent) 0 16px,transparent 16px 20px),repeating-linear-gradient(90deg,var(--accent-2) 0 16px,transparent 16px 20px);background-size:200px 4px,200px 4px;background-position:0 0,0 4px;background-repeat:repeat no-repeat;border-radius:6px;margin:10px 0}
+    .divider{height:8px;background:repeating-linear-gradient(90deg,var(--primary) 0 16px,transparent 16px 20px),repeating-linear-gradient(90deg,var(--primary-600) 0 16px,transparent 16px 20px);background-size:200px 4px,200px 4px;background-position:0 0,0 4px;background-repeat:repeat no-repeat;border-radius:6px;margin:10px 0}
     .empty{opacity:.7;border:1px dashed var(--line);border-radius:14px;padding:16px;text-align:center;background:#fff}
     .error{background:#fff3f3;border:1px solid #ffd1d1;color:#9a1e1e;padding:12px;border-radius:12px}
   </style>
@@ -72,3 +72,225 @@
         </div>
       </div>
       <div class="topbar">
+        <div class="search">
+          <span>🔎</span>
+          <input id="search" type="search" placeholder="Buscar platillo (ej. tasajo, café, agua del día)…" />
+        </div>
+        <div class="service-pill" id="serviceTitle">Servicio actual</div>
+        <button class="toggle" id="toggleService" title="Cambiar servicio manualmente">Cambiar servicio</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="grid"></main>
+
+  <footer>
+    <div class="wrap">
+      <div>© <span id="year"></span> Restaurante Charly</div>
+      <div>Actualiza el Google Sheet y refresca la página</div>
+    </div>
+  </footer>
+
+  <script>
+    // ========= CONFIG =========
+    const CONFIG = {
+      SHEET_CSV_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTcx99wCph10SjSUFDkuOl4qecxnOani78bdsJLctWOpvwF8DFkZXon0mabI_Gj_ch4Bw5lLwRP93CH/pub?output=csv",
+      CURRENCY: "MXN"
+    };
+    // ==========================
+
+    const el = (s) => document.querySelector(s);
+
+    // Hora local CDMX
+    function nowInMX(){
+      try { return new Date(new Date().toLocaleString('en-US', { timeZone:'America/Mexico_City' })); }
+      catch { return new Date(); }
+    }
+    function autoService(){
+      const h = nowInMX().getHours();
+      return (h < 12) ? 'Desayunos' : 'Comidas';
+    }
+    let SERVICE = '';
+    let MANUAL = false;
+
+    // CSV robusto (respeta comillas y BOM)
+    function parseCSV(text){
+      const rows=[]; let row=[], cur='', inside=false; const push=()=>{row.push(cur);cur=''};
+      text = String(text||'').replace(/^\uFEFF/, ''); // quitar BOM si existe
+      for(let i=0;i<text.length;i++){
+        const ch=text[i];
+        if(ch==='"'){
+          if(inside && text[i+1]==='"'){cur+='"'; i++;}
+          else{inside=!inside;}
+        } else if(ch===',' && !inside){ push(); }
+        else if((ch==='\n' || ch==='\r') && !inside){ if(cur!=='' || row.length){ push(); rows.push(row); row=[]; } }
+        else { cur+=ch; }
+      }
+      if(cur!=='' || row.length){ push(); rows.push(row); }
+      return rows;
+    }
+
+    function toRecords(rows){
+      if(!rows || !rows.length) return [];
+      // Normaliza encabezados: minúsculas y sin acentos
+      const norm = (s)=> String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
+      const header = rows[0].map(h=>norm(h));
+
+      // Encuentra índice por sinónimos
+      const findIdx = (alts)=>{
+        for(const a of alts){ const i = header.indexOf(a); if(i!==-1) return i; }
+        return -1;
+      };
+
+      const catIdx   = findIdx(['category','categoria','categoria/section','seccion','sección','tipo']);
+      const itemIdx  = findIdx(['item','platillo','producto','nombre']);
+      const descIdx  = findIdx(['description','descripcion','descripción','detalle','desc']);
+      const priceIdx = findIdx(['price','precio','costo','importe']);
+      const availIdx = findIdx(['available','disponible']);
+
+      const missing=[];
+      if(catIdx===-1)  missing.push('category/categoría');
+      if(itemIdx===-1) missing.push('item/platillo');
+      if(descIdx===-1) missing.push('description/descripción');
+      if(priceIdx===-1)missing.push('price/precio');
+      if(missing.length){
+        throw new Error('Faltan columnas: ' + missing.join(', ') + '. Encabezados detectados: ' + header.join(', '));
+      }
+
+      const out=[];
+      for(let i=1;i<rows.length;i++){
+        const r=rows[i]; if(!r || !r.length) continue;
+        const rec = {
+          category:String(r[catIdx]||'').trim()||'Sin categoría',
+          item:String(r[itemIdx]||'').trim(),
+          description:String(r[descIdx]||'').trim(),
+          price:String(r[priceIdx]||'').trim(),
+          available:true
+        };
+        if(availIdx!==-1){
+          const v = norm(r[availIdx]);
+          if(v==='false' || v==='0' || v==='no'){ rec.available=false; }
+        }
+        if(rec.item) out.push(rec);
+      }
+      return out;
+    }
+      }
+      const idx = (k)=> header.indexOf(k);
+      const availIdx = idx('available');
+      const out=[];
+      for(let i=1;i<rows.length;i++){
+        const r=rows[i]; if(!r || !r.length) continue;
+        const rec = {
+          category:String(r[idx('category')]||'').trim()||'Sin categoría',
+          item:String(r[idx('item')]||'').trim(),
+          description:String(r[idx('description')]||'').trim(),
+          price:String(r[idx('price')]||'').trim(),
+          available:true
+        };
+        if(availIdx !== -1){
+          const v = String(r[availIdx]||'').trim().toLowerCase();
+          if(v==='false' || v==='0' || v==='no'){ rec.available = false; }
+        }
+        if(rec.item) out.push(rec);
+      }
+      return out;
+    }
+
+    function money(v){
+      const num=Number(String(v).replace(/[^0-9.\-]/g,''));
+      if(Number.isFinite(num)){
+        return new Intl.NumberFormat('es-MX',{style:'currency',currency:CONFIG.CURRENCY}).format(num);
+      }
+      return v || '';
+    }
+
+    function groupBy(arr,key){
+      return arr.reduce((acc,x)=>{(acc[x[key]] ||= []).push(x);return acc;},{});
+    }
+
+    const ICON = (name)=>{
+      const n = String(name||'').toLowerCase();
+      if(n.includes('bebidas calientes')) return '🫖';
+      if(n.includes('entradas')) return '🥗';
+      if(n.includes('comida')) return '🍽️';
+      if(n.includes('desayuno')) return '🍳';
+      if(n.includes('bebidas')) return '🥤';
+      return '🍽️';
+    }
+
+    function render(records){
+      const grid=el('#grid');
+      const q=el('#search').value.trim().toLowerCase();
+      const filtered=records
+        .filter(r => r.available !== false)
+        .filter(r => !q || ((r.item||'') + ' ' + (r.description||'')).toLowerCase().includes(q));
+      const byCat=groupBy(filtered,'category');
+
+      // Orden preferido según servicio (case-insensitive)
+      const breakfastOrder = ['bebidas calientes','comida','desayunos','entradas','bebidas']; // mañana
+      const lunchOrder     = ['entradas','comida','bebidas','bebidas calientes','desayunos'];  // tarde
+      const ORDER = (SERVICE==='Desayunos') ? breakfastOrder : lunchOrder;
+
+      const cats = Object.keys(byCat).sort((a,b)=>{
+        const na = String(a||'').trim().toLowerCase();
+        const nb = String(b||'').trim().toLowerCase();
+        const ia = ORDER.indexOf(na); const ib = ORDER.indexOf(nb);
+        const sa = ia === -1 ? 999 : ia; const sb = ib === -1 ? 999 : ib;
+        return sa - sb || na.localeCompare(nb,'es');
+      });
+
+      grid.innerHTML='';
+      if(cats.length===0){
+        const empty = document.createElement('div');
+        empty.className='empty';
+        empty.innerHTML = 'No hay platillos para mostrar con los filtros actuales.';
+        grid.appendChild(empty);
+        return;
+      }
+
+      cats.forEach(cat=>{
+        const card=document.createElement('section');
+        card.className='card';
+        const icon = ICON(cat);
+        card.innerHTML=`<h2>${icon} ${cat} <span class="chip">${byCat[cat].length} items</span></h2><div class="divider"></div>`;
+        byCat[cat].forEach(r=>{
+          const item=document.createElement('div');
+          item.className='item';
+          item.innerHTML=`<div><div class='name'>${r.item}</div><div class='desc'>${r.description||''}</div></div><div class='price'>${money(r.price)}</div>`;
+          card.appendChild(item);
+        });
+        grid.appendChild(card);
+      });
+    }
+
+    async function init(){
+      el('#year').textContent=new Date().getFullYear();
+      SERVICE = autoService();
+      const st = el('#serviceTitle'); if(st) st.textContent = 'Servicio actual: ' + SERVICE;
+      const btn = el('#toggleService');
+      if(btn){ btn.addEventListener('click', ()=>{
+        MANUAL = true;
+        SERVICE = (SERVICE==='Desayunos') ? 'Comidas' : 'Desayunos';
+        st.textContent = 'Servicio actual: ' + SERVICE + ' (manual)';
+        render(window.__records||[]);
+      });}
+      try{
+        const res = await fetch(CONFIG.SHEET_CSV_URL, { cache: 'no-store' });
+        if(!res.ok) throw new Error(res.status + ' ' + res.statusText);
+        const text = await res.text();
+        const rows = parseCSV(text);
+        const records = toRecords(rows);
+        window.__records = records; // cache en memoria para re-render
+        render(records);
+        el('#search').oninput=()=>render(window.__records||[]);
+      }catch(err){
+        console.error(err);
+        const grid=el('#grid');
+        grid.innerHTML = `<div class='error'>Error al cargar el menú.<br><small>Revisa que el CSV esté publicado y que los encabezados sean: <code>category, item, description, price</code>.</small></div>`;
+      }
+    }
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
