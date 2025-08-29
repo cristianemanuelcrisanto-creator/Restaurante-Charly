@@ -5,52 +5,49 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Menú del día – Restaurante Charly</title>
   <style>
-    /* Tema oscuro limpio */
+    /* Paleta clara, cálida (terracotas y crema) */
     :root{
-      --bg:#0b0f14;
-      --card:#10161f;
-      --border:#2a3441;
-      --text:#e6edf3;
-      --muted:#9fb1c7;
-      --accent:#4fb477;         /* título sección / marca */
-      --chip:#ffc4ab;           /* suave del banner si lo quieres usar */
-      --badge-extra-bg:#2a1717;
-      --badge-extra-border:#824040;
-      --badge-extra-text:#ffb3b3;
+      --bg:#fff7f0;            /* crema suave de fondo */
+      --card:#ffffff;          /* tarjetas blancas */
+      --border:#f3d9c6;        /* borde durazno claro */
+      --text:#2a2a2a;          /* texto principal */
+      --muted:#6b7280;         /* texto secundario */
+      --accent:#f5743e;        /* terracota (principal) */
+      --accent-strong:#e25a20; /* terracota más intenso */
+      --chip-bg:#fff0e8;       /* fondo chips banner */
+      --shadow: 0 6px 16px rgba(245,116,62,0.08);
     }
     *{box-sizing:border-box}
     body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,"Helvetica Neue",Arial,"Noto Sans",sans-serif;background:var(--bg);color:var(--text)}
-    .wrap{max-width:900px;margin:0 auto;padding:24px}
+    .wrap{max-width:960px;margin:0 auto;padding:22px}
 
-    header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
-    .logo{font-size:1.4rem;font-weight:800;letter-spacing:.3px}
+    header{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:12px}
+    .logo{font-size:1.5rem;font-weight:800;letter-spacing:.25px}
     .logo em{color:var(--accent);font-style:normal}
-    .search{padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);min-width:220px;flex:1}
+    .search{padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:#fff;color:var(--text);min-width:220px;flex:1;box-shadow:var(--shadow)}
 
     /* Banner de precios */
-    .pricing{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0 16px;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:var(--card)}
+    .pricing{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:12px 0 18px;padding:12px 14px;border:1px solid var(--border);border-radius:14px;background:#fff;box-shadow:var(--shadow)}
     .deal{display:flex;gap:8px;align-items:center;font-size:1rem}
-    .chip{display:inline-block;padding:2px 10px;border-radius:999px;border:1px solid var(--border);background:var(--bg);font-weight:700}
+    .chip{display:inline-block;padding:4px 12px;border-radius:999px;border:1px solid var(--border);background:var(--chip-bg);font-weight:800}
     .chip.sencillo{color:var(--text)}
-    .chip.completo{color:var(--accent);border-color:#2b6f4a}
+    .chip.completo{color:var(--accent-strong);border-color:#f4b399;background:#ffe6dc}
     .muted{color:var(--muted);font-size:.95rem}
     .sep{width:10px}
 
-    main{display:grid;gap:16px}
-    .card{background:var(--card);padding:18px;border-radius:16px;border:1px solid var(--border)}
-    .card h2{margin:0 0 10px;font-size:1.15rem;color:var(--accent)}
-    .item{display:flex;justify-content:space-between;gap:12px;border-top:1px dashed var(--border);padding:10px 0}
-    .item:first-child{border-top:none}
-    .name{font-weight:700}
-    .desc{color:var(--muted);font-size:.92rem}
-    .price{font-weight:800;white-space:nowrap}
-    .badge{display:inline-block;margin-left:8px;padding:2px 8px;border-radius:999px;font-size:.75rem;border:1px solid var(--border)}
-    .badge.extra{color:var(--badge-extra-text);border-color:var(--badge-extra-border);background:var(--badge-extra-bg)}
+    .controls{display:flex;gap:10px;align-items:center;margin-bottom:6px}
+    .service{background:#fff;border:1px solid var(--border);color:var(--accent-strong);padding:8px 10px;border-radius:10px;display:inline-block;box-shadow:var(--shadow)}
+    .btn{padding:8px 12px;border-radius:10px;border:1px solid var(--border);background:#fff;color:var(--text);cursor:pointer;box-shadow:var(--shadow)}
+    .btn:hover{filter:brightness(1.03)}
 
-    .service{margin:0 0 8px;background:var(--card);border:1px solid var(--border);color:#bfe1ff;padding:8px 10px;border-radius:10px;display:inline-block}
-    .controls{display:flex;gap:10px;align-items:center}
-    .btn{padding:8px 10px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer}
-    .btn:hover{filter:brightness(1.05)}
+    main{display:grid;gap:16px}
+    .card{background:var(--card);padding:18px;border-radius:16px;border:1px solid var(--border);box-shadow:var(--shadow)}
+    .card h2{margin:0 0 10px;font-size:1.15rem;color:var(--accent)}
+    .item{display:flex;justify-content:space-between;gap:12px;border-top:1px dashed var(--border);padding:12px 0}
+    .item:first-child{border-top:none}
+    .name{font-weight:800}
+    .desc{color:var(--muted);font-size:.95rem}
+    .price{font-weight:900;white-space:nowrap;color:#1f2937}
 
     footer{margin-top:22px;color:var(--muted);text-align:center;font-size:.95rem}
   </style>
@@ -68,7 +65,7 @@
       <div class="sep"></div>
       <div class="deal"><span class="chip completo">Completo</span> <strong>$90</strong> <span id="dealText" class="muted"></span></div>
       <div class="sep"></div>
-      <div class="muted">Los <strong>extras</strong> se cobran aparte.</div>
+      <div class="muted">Los extras se cobran aparte.</div>
     </div>
 
     <div class="controls">
@@ -86,6 +83,7 @@
   <script>
     // ========= CONFIG =========
     const CONFIG = {
+      // tu CSV publicado de Google Sheets
       SHEET_CSV_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTcx99wCph10SjSUFDkuOl4qecxnOani78bdsJLctWOpvwF8DFkZXon0mabI_Gj_ch4Bw5lLwRP93CH/pub?gid=153344127&single=true&output=csv",
       CURRENCY: "MXN"
     };
@@ -188,12 +186,6 @@
         return sa - sb || na.localeCompare(nb,'es');
       });
 
-      // Definir qué categorías están incluidas en "Completo"
-      const includedBreakfast = new Set(['desayunos','bebidas calientes']);
-      const includedLunch     = new Set(['comida','entradas']);
-      const INCLUDED = (SERVICE === 'Desayunos') ? includedBreakfast : includedLunch;
-      const isIncludedCategory = (cat) => INCLUDED.has(String(cat||'').trim().toLowerCase());
-
       grid.innerHTML='';
       if(cats.length===0){
         const empty = document.createElement('section');
@@ -208,12 +200,11 @@
         card.className='card';
         card.innerHTML=`<h2>${cat}</h2>`;
         byCat[cat].forEach(r=>{
-          const extraTag = isIncludedCategory(cat) ? '' : `<span class="badge extra">extra</span>`;
           const item=document.createElement('div');
           item.className='item';
           item.innerHTML=`
             <div>
-              <div class='name'>${r.item} ${extraTag}</div>
+              <div class='name'>${r.item}</div>
               <div class='desc'>${r.description}</div>
             </div>
             <div class='price'>${money(r.price)}</div>
@@ -232,11 +223,9 @@
       const st = $("#serviceTitle");
       if(st) st.textContent = 'Servicio actual: ' + SERVICE;
       const dealText = $("#dealText");
-      if (SERVICE === 'Desayunos') {
-        dealText.textContent = '— incluye 1 bebida caliente';
-      } else {
-        dealText.textContent = '— incluye 1 entrada';
-      }
+      dealText.textContent = (SERVICE === 'Desayunos')
+        ? '— incluye 1 bebida caliente'
+        : '— incluye 1 entrada';
 
       try{
         const res = await fetch(CONFIG.SHEET_CSV_URL, { cache: 'no-store' });
@@ -247,19 +236,20 @@
         render(records);
         $("#search").oninput = () => render(records);
 
-        // botón para previsualizar (no cambia la hora real, solo el orden e inclusiones)
+        // Previsualización manual del servicio
         $("#toggleService").onclick = () => {
           SERVICE = (SERVICE === 'Desayunos') ? 'Comidas' : 'Desayunos';
           const st2 = $("#serviceTitle");
           if(st2) st2.textContent = 'Servicio actual: ' + SERVICE;
-          if (SERVICE === 'Desayunos') { $("#dealText").textContent = '— incluye 1 bebida caliente'; }
-          else { $("#dealText").textContent = '— incluye 1 entrada'; }
+          $("#dealText").textContent = (SERVICE === 'Desayunos')
+            ? '— incluye 1 bebida caliente'
+            : '— incluye 1 entrada';
           render(records);
         };
 
       }catch(err){
         console.error(err);
-        $("#grid").innerHTML='<p style="color:#ffb3b3">Error al cargar el menú.<br><small>Revisa que el CSV esté publicado y que los encabezados sean: <code>category, item, description, price, available</code> (esta última es opcional).</small></p>';
+        $("#grid").innerHTML='<p style="color:#b42318">Error al cargar el menú.<br><small>Revisa que el CSV esté publicado y que los encabezados sean: <code>category, item, description, price, available</code> (esta última es opcional).</small></p>';
       }
     }
     document.addEventListener('DOMContentLoaded',init);
