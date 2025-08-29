@@ -5,46 +5,76 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Menú del día – Restaurante Charly</title>
   <style>
+    /* Tema oscuro limpio */
     :root{
-      --p50:#FEF6F2;  /* Wax Flower 50 */
-      --p100:#FFEAE1; /* 100 */
-      --p200:#F8D8C8; /* 200 */
-      --p300:#FFC4AB; /* 300 */
-      --p400:#FD976C; /* 400 */
-      --p500:#F5743E; /* 500 */
-      --p600:#E25A20; /* 600 */
-      --p700:#BE4917; /* 700 */
-      --p800:#9D3F17; /* 800 */
-      --p900:#82391A; /* 900 */
-      --p950:#471B08; /* 950 */
+      --bg:#0b0f14;
+      --card:#10161f;
+      --border:#2a3441;
+      --text:#e6edf3;
+      --muted:#9fb1c7;
+      --accent:#4fb477;         /* título sección / marca */
+      --chip:#ffc4ab;           /* suave del banner si lo quieres usar */
+      --badge-extra-bg:#2a1717;
+      --badge-extra-border:#824040;
+      --badge-extra-text:#ffb3b3;
     }
-
     *{box-sizing:border-box}
-    body {margin:0;font-family:system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;background:var(--p50);color:var(--p950)}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,"Helvetica Neue",Arial,"Noto Sans",sans-serif;background:var(--bg);color:var(--text)}
     .wrap{max-width:900px;margin:0 auto;padding:24px}
-    header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
-    .logo{font-size:1.5rem;font-weight:bold;color:var(--p700)}
-    .search{padding:8px 12px;border-radius:8px;border:1px solid var(--p200);background:#fff;color:var(--p950);min-width:220px}
+
+    header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
+    .logo{font-size:1.4rem;font-weight:800;letter-spacing:.3px}
+    .logo em{color:var(--accent);font-style:normal}
+    .search{padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);min-width:220px;flex:1}
+
+    /* Banner de precios */
+    .pricing{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0 16px;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:var(--card)}
+    .deal{display:flex;gap:8px;align-items:center;font-size:1rem}
+    .chip{display:inline-block;padding:2px 10px;border-radius:999px;border:1px solid var(--border);background:var(--bg);font-weight:700}
+    .chip.sencillo{color:var(--text)}
+    .chip.completo{color:var(--accent);border-color:#2b6f4a}
+    .muted{color:var(--muted);font-size:.95rem}
+    .sep{width:10px}
+
     main{display:grid;gap:16px}
-    .card{background:#fff;padding:18px;border-radius:16px;border:1px solid var(--p200)}
-    .card h2{margin:0 0 10px;font-size:1.2rem;color:var(--p700)}
-    .item{display:flex;justify-content:space-between;border-top:1px dashed var(--p200);padding:8px 0;gap:12px}
+    .card{background:var(--card);padding:18px;border-radius:16px;border:1px solid var(--border)}
+    .card h2{margin:0 0 10px;font-size:1.15rem;color:var(--accent)}
+    .item{display:flex;justify-content:space-between;gap:12px;border-top:1px dashed var(--border);padding:10px 0}
     .item:first-child{border-top:none}
-    .name{font-weight:600}
-    .desc{color:var(--p800);font-size:.9rem}
-    .price{font-weight:bold;white-space:nowrap;color:var(--p700)}
-    .service{margin:-6px 0 16px;background:var(--p100);border:1px solid var(--p200);color:var(--p700);padding:10px 12px;border-radius:10px;display:inline-block}
-    footer{margin-top:24px;color:var(--p900);text-align:center}
+    .name{font-weight:700}
+    .desc{color:var(--muted);font-size:.92rem}
+    .price{font-weight:800;white-space:nowrap}
+    .badge{display:inline-block;margin-left:8px;padding:2px 8px;border-radius:999px;font-size:.75rem;border:1px solid var(--border)}
+    .badge.extra{color:var(--badge-extra-text);border-color:var(--badge-extra-border);background:var(--badge-extra-bg)}
+
+    .service{margin:0 0 8px;background:var(--card);border:1px solid var(--border);color:#bfe1ff;padding:8px 10px;border-radius:10px;display:inline-block}
+    .controls{display:flex;gap:10px;align-items:center}
+    .btn{padding:8px 10px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer}
+    .btn:hover{filter:brightness(1.05)}
+
+    footer{margin-top:22px;color:var(--muted);text-align:center;font-size:.95rem}
   </style>
 </head>
 <body>
   <div class="wrap">
     <header>
-      <div class="logo">Restaurante Charly</div>
-      <input id="search" type="search" class="search" placeholder="Buscar platillo…" />
+      <div class="logo">Restaurante <em>Charly</em></div>
+      <input id="search" type="search" class="search" placeholder="Buscar platillo… (ej. chilaquiles, café, agua del día)" />
     </header>
 
-    <div class="service" id="serviceTitle">Servicio actual</div>
+    <!-- Banner precios -->
+    <div id="pricing" class="pricing" aria-live="polite">
+      <div class="deal"><span class="chip sencillo">Sencillo</span> <strong>$80</strong> <span class="muted">(solo platillo)</span></div>
+      <div class="sep"></div>
+      <div class="deal"><span class="chip completo">Completo</span> <strong>$90</strong> <span id="dealText" class="muted"></span></div>
+      <div class="sep"></div>
+      <div class="muted">Los <strong>extras</strong> se cobran aparte.</div>
+    </div>
+
+    <div class="controls">
+      <div id="serviceTitle" class="service">Servicio actual: …</div>
+      <button id="toggleService" class="btn" title="Solo para previsualizar">Cambiar servicio</button>
+    </div>
 
     <main id="grid"></main>
 
@@ -61,9 +91,9 @@
     };
     // ==========================
 
-    const el = (s) => document.querySelector(s);
+    const $ = (s) => document.querySelector(s);
 
-    // Hora local CDMX
+    // Hora local CDMX → define servicio
     function nowInMX(){
       try { return new Date(new Date().toLocaleString('en-US', { timeZone:'America/Mexico_City' })); }
       catch { return new Date(); }
@@ -84,7 +114,7 @@
           if(inside && text[i+1]==='"'){cur+='"'; i++;}
           else{inside=!inside;}
         } else if(ch===',' && !inside){ push(); }
-        else if((ch==='\n' || ch==='\r') && !inside){ if(cur!=='' || row.length){ push(); rows.push(row); row=[]; } if(ch==='\r' && text[i+1]==='\n'){ i++; } }
+        else if((ch==='\n' || ch==='\r') && !inside){ if(cur!=='' || row.length){ push(); rows.push(row); row=[]; } }
         else { cur+=ch; }
       }
       if(cur!=='' || row.length){ push(); rows.push(row); }
@@ -93,37 +123,28 @@
 
     function toRecords(rows){
       if(!rows || !rows.length) return [];
-      // Normaliza encabezados: minúsculas y sin acentos
-      const norm = (s)=> String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
-      const header = rows[0].map(h=>norm(h));
-
-      // Índices por sinónimos (es/en)
-      const findIdx = (alts)=>{ for(const a of alts){ const i = header.indexOf(a); if(i!==-1) return i; } return -1; };
-      const catIdx   = findIdx(['category','categoria','categoria/section','seccion','sección','tipo']);
-      const itemIdx  = findIdx(['item','platillo','producto','nombre']);
-      const descIdx  = findIdx(['description','descripcion','descripción','detalle','desc']);
-      const priceIdx = findIdx(['price','precio','costo','importe']);
-      const availIdx = findIdx(['available','disponible']);
-
-      const missing=[];
-      if(catIdx===-1)  missing.push('category/categoría');
-      if(itemIdx===-1) missing.push('item/platillo');
-      if(descIdx===-1) missing.push('description/descripción');
-      if(priceIdx===-1)missing.push('price/precio');
-      if(missing.length){ throw new Error('Faltan columnas: ' + missing.join(', ') + '. Encabezados: ' + header.join(', ')); }
+      const header = rows[0].map(h=>String(h||'').trim().toLowerCase());
+      const need = ['category','item','description','price'];
+      for(const k of need){
+        if(!header.includes(k)){
+          throw new Error('Falta la columna: ' + k + '. Encabezados encontrados: ' + header.join(', '));
+        }
+      }
+      const idx = (k)=> header.indexOf(k);
+      const avIdx = idx('available');
 
       const out=[];
       for(let i=1;i<rows.length;i++){
         const r=rows[i]; if(!r || !r.length) continue;
         const rec = {
-          category:String(r[catIdx]||'').trim()||'Sin categoría',
-          item:String(r[itemIdx]||'').trim(),
-          description:String(r[descIdx]||'').trim(),
-          price:String(r[priceIdx]||'').trim(),
+          category:String(r[idx('category')]||'').trim()||'Sin categoría',
+          item:String(r[idx('item')]||'').trim(),
+          description:String(r[idx('description')]||'').trim(),
+          price:String(r[idx('price')]||'').trim(),
           available:true
         };
-        if(availIdx !== -1){
-          const v = norm(r[availIdx]);
+        if(avIdx !== -1){
+          const v = String(r[avIdx]||'').trim().toLowerCase();
           if(v==='false' || v==='0' || v==='no'){ rec.available = false; }
         }
         if(rec.item) out.push(rec);
@@ -144,16 +165,19 @@
     }
 
     function render(records){
-      const grid=el('#grid');
-      const q=el('#search').value.trim().toLowerCase();
+      const grid=$("#grid");
+      const q=$("#search").value.trim().toLowerCase();
+
+      // Filtro: disponibles + búsqueda
       const filtered=records
         .filter(r => r.available !== false)
         .filter(r => !q || ((r.item||'') + ' ' + (r.description||'')).toLowerCase().includes(q));
+
       const byCat=groupBy(filtered,'category');
 
-      // Orden preferido según servicio (case-insensitive)
-      const breakfastOrder = ['bebidas calientes','comida','desayunos','entradas','bebidas']; // mañana
-      const lunchOrder     = ['entradas','comida','bebidas','bebidas calientes','desayunos'];  // tarde
+      // Orden de categorías por servicio (case-insensitive)
+      const breakfastOrder = ['bebidas calientes','desayunos','entradas','comida','bebidas'];
+      const lunchOrder     = ['entradas','comida','bebidas','bebidas calientes','desayunos'];
       const ORDER = (SERVICE==='Desayunos') ? breakfastOrder : lunchOrder;
 
       const cats = Object.keys(byCat).sort((a,b)=>{
@@ -164,9 +188,15 @@
         return sa - sb || na.localeCompare(nb,'es');
       });
 
+      // Definir qué categorías están incluidas en "Completo"
+      const includedBreakfast = new Set(['desayunos','bebidas calientes']);
+      const includedLunch     = new Set(['comida','entradas']);
+      const INCLUDED = (SERVICE === 'Desayunos') ? includedBreakfast : includedLunch;
+      const isIncludedCategory = (cat) => INCLUDED.has(String(cat||'').trim().toLowerCase());
+
       grid.innerHTML='';
       if(cats.length===0){
-        const empty = document.createElement('div');
+        const empty = document.createElement('section');
         empty.className='card';
         empty.innerHTML = '<div class="desc">No hay platillos para mostrar con los filtros actuales.</div>';
         grid.appendChild(empty);
@@ -178,9 +208,16 @@
         card.className='card';
         card.innerHTML=`<h2>${cat}</h2>`;
         byCat[cat].forEach(r=>{
+          const extraTag = isIncludedCategory(cat) ? '' : `<span class="badge extra">extra</span>`;
           const item=document.createElement('div');
           item.className='item';
-          item.innerHTML=`<div><div class='name'>${r.item}</div><div class='desc'>${r.description||''}</div></div><div class='price'>${money(r.price)}</div>`;
+          item.innerHTML=`
+            <div>
+              <div class='name'>${r.item} ${extraTag}</div>
+              <div class='desc'>${r.description}</div>
+            </div>
+            <div class='price'>${money(r.price)}</div>
+          `;
           card.appendChild(item);
         });
         grid.appendChild(card);
@@ -188,9 +225,19 @@
     }
 
     async function init(){
-      el('#year').textContent=new Date().getFullYear();
+      $("#year").textContent=new Date().getFullYear();
+
+      // Servicio según hora + texto del banner
       SERVICE = currentService();
-      const st = el('#serviceTitle'); if(st) st.textContent = 'Servicio actual: ' + SERVICE;
+      const st = $("#serviceTitle");
+      if(st) st.textContent = 'Servicio actual: ' + SERVICE;
+      const dealText = $("#dealText");
+      if (SERVICE === 'Desayunos') {
+        dealText.textContent = '— incluye 1 bebida caliente';
+      } else {
+        dealText.textContent = '— incluye 1 entrada';
+      }
+
       try{
         const res = await fetch(CONFIG.SHEET_CSV_URL, { cache: 'no-store' });
         if(!res.ok) throw new Error(res.status + ' ' + res.statusText);
@@ -198,13 +245,24 @@
         const rows = parseCSV(text);
         const records = toRecords(rows);
         render(records);
-        el('#search').oninput=()=>render(records);
+        $("#search").oninput = () => render(records);
+
+        // botón para previsualizar (no cambia la hora real, solo el orden e inclusiones)
+        $("#toggleService").onclick = () => {
+          SERVICE = (SERVICE === 'Desayunos') ? 'Comidas' : 'Desayunos';
+          const st2 = $("#serviceTitle");
+          if(st2) st2.textContent = 'Servicio actual: ' + SERVICE;
+          if (SERVICE === 'Desayunos') { $("#dealText").textContent = '— incluye 1 bebida caliente'; }
+          else { $("#dealText").textContent = '— incluye 1 entrada'; }
+          render(records);
+        };
+
       }catch(err){
         console.error(err);
-        el('#grid').innerHTML='<p style="color:var(--p700)">Error al cargar el menú.<br><small>Revisa que el CSV esté publicado y que los encabezados sean: <code>category/categoría, item/platillo, description/descripción, price/precio</code>.</small></p>';
+        $("#grid").innerHTML='<p style="color:#ffb3b3">Error al cargar el menú.<br><small>Revisa que el CSV esté publicado y que los encabezados sean: <code>category, item, description, price, available</code> (esta última es opcional).</small></p>';
       }
     }
-    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('DOMContentLoaded',init);
   </script>
 </body>
 </html>
